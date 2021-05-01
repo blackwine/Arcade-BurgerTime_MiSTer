@@ -197,7 +197,7 @@ localparam CONF_STR = {
 	"H0OJK,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
 	"H0O2,Orientation,Vert,Horz;",
 	"O35,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
-	"O7,Flip Screen,Off,On;",
+	"O7,CRT Flip Screen,Off,On;",
 	"O8,Video timing,Original,59.8Hz;",
 	"-;",
 	"DIP;",
@@ -414,7 +414,7 @@ burger_time burger_time
 	.flip_screen(status[7]),
 	.orig_vtiming(orig_vtiming),
 	.cpu_speed(cpu_speed),
-	.screen_flipped_o(screen_flipped)
+	.screen_flipped(screen_flipped)
 );
 
 // HISCORE SYSTEM

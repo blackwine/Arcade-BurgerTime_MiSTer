@@ -83,7 +83,7 @@ port
 	flip_screen    : in  std_logic;
 	orig_vtiming   : in  std_logic := '1'; -- 1: 272 lines @ 57.44Hz, 0: 261 lines @ 59.86Hz
 	cpu_speed      : in  std_logic := '1'; -- 0: 0.75Mhz, 1: 1.5Mhz
-	screen_flipped_o : out std_logic
+	screen_flipped : inout std_logic
 
   );
 end burger_time;
@@ -140,7 +140,6 @@ architecture syn of burger_time is
   signal vcnt_flip : std_logic_vector(8 downto 0);
   signal cocktail_we   : std_logic;
   signal cocktail_flip : std_logic := '0';
-  signal screen_flipped: std_logic;
   signal hcnt8_r       : std_logic;
   signal hcnt8_rr      : std_logic;
 
@@ -396,7 +395,6 @@ cpu_di_dec <= cpu_di when decrypt = '0' else
 ----------------------------
 
 screen_flipped <= flip_screen xor cocktail_flip;
-screen_flipped_o <= screen_flipped;
 
 -- foreground ram addr
 fg_ram_addr_sel <= "00" when cpu_ena = '1' and cpu_addr(11) = '0' else
