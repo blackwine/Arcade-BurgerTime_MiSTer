@@ -360,7 +360,7 @@ assign AUDIO_R = AUDIO_L;
 assign AUDIO_S = 0;
 
 wire rom_download = ioctl_download & !ioctl_index;
-wire reset = (RESET | status[0] | buttons[1]);
+wire reset = (RESET | status[0] | buttons[1] | ioctl_download);
 wire orig_vtiming = ~status[8];
 wire cpu_speed = 1;
 

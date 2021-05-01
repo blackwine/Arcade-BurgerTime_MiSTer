@@ -182,7 +182,7 @@ cpu_di <= wram_do        when wram_cs       = '1' else
 			 sound_code     when sound_code_cs = '1' else
           X"FF";
 	
--- regsiter sound code and irq management
+-- register sound code and irq management
 process (clock_12)
 begin
 	if rising_edge(clock_12) then

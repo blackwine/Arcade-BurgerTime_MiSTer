@@ -102,6 +102,7 @@ architecture syn of burger_time is
   signal cpu_do         : std_logic_vector( 7 downto 0);
   signal cpu_rw_n       : std_logic;
   signal cpu_nmi_n      : std_logic;
+  signal cpu_irq_n      : std_logic;
   signal cpu_sync       : std_logic;
   signal cpu_ena        : std_logic;
   signal had_written    : std_logic := '0';
@@ -200,7 +201,7 @@ architecture syn of burger_time is
 	signal bg_bits       : std_logic_vector( 2 downto 0);
 
 	-- misc
-	signal raz_nmi_we : std_logic;
+	signal int_ack_we : std_logic;
 	signal coin1_r : std_logic;
 	signal coin2_r : std_logic;
 	signal sound_req : std_logic;
@@ -326,6 +327,7 @@ process (reset,clock_12)
 begin
 	if reset = '1' then
 		cpu_nmi_n <= '1';
+		cpu_irq_n <= '1';
 		had_written <='0';
 		cocktail_flip <= '0';
 	else
@@ -333,10 +335,10 @@ begin
 			coin1_r <= coin1;
 			coin2_r <= coin2;
 			if (coin1_r = '0' and coin1 = '1') or (coin2_r = '0' and coin2 = '1') then
-				cpu_nmi_n <= '0';
+				cpu_irq_n <= '0';
 			end if;
-			if raz_nmi_we = '1' then
-				cpu_nmi_n <= '1';
+			if int_ack_we = '1' then
+				cpu_irq_n <= '1';
 			end if;
 			if cpu_ena = '1' then
 				if cpu_rw_n = '0' then
@@ -364,7 +366,7 @@ prog_rom_cs <= '1' when cpu_addr(15)           = '1'             else '0'; -- pr
 
 -- write enable
 wram_we        <= '1' when wram_cs = '1'                          and cpu_rw_n = '0' and cpu_ena = '1' else '0'; -- 0000-07ff
-raz_nmi_we     <= '1' when io_cs = '1'     and cpu_addr(2 downto 0) = "000" and cpu_rw_n = '0' and cpu_ena = '1' else '0'; -- 4000
+int_ack_we     <= '1' when io_cs = '1'     and cpu_addr(2 downto 0) = "000" and cpu_rw_n = '0' and cpu_ena = '1' else '0'; -- 4000
 scroll1_we     <= '1' when io_cs = '1'     and cpu_addr(2 downto 0) = "100" and cpu_rw_n = '0' and cpu_ena = '1' else '0'; -- 4004
 scroll2_we     <= '1' when io_cs = '1'     and cpu_addr(2 downto 0) = "101" and cpu_rw_n = '0' and cpu_ena = '1' else '0'; -- 4005
 cocktail_we    <= '1' when io_cs = '1'     and cpu_addr(2 downto 0) = "010" and cpu_rw_n = '0' and cpu_ena = '1' else '0'; -- 4002
@@ -678,7 +680,7 @@ port map
     Clk         => clock_12,
     Rdy         => not pause,
     Abort_n     => '1',
-    IRQ_n       => '1',--cpu_irq_n,
+    IRQ_n       => cpu_irq_n,
     NMI_n       => cpu_nmi_n,
     SO_n        => '1',--cpu_so_n,
     R_W_n       => cpu_rw_n,
