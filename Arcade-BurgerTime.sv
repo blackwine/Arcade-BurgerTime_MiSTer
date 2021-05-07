@@ -197,6 +197,8 @@ localparam CONF_STR = {
 	"H0OJK,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
 	"H0O2,Orientation,Vert,Horz;",
 	"O35,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
+	"OOR,CRT H-sync Adjust,0,1,2,3,4,5,6,7,-8,-7,-6,-5,-4,-3,-2,-1;",
+	"OSV,CRT V-sync Adjust,0,1,2,3,4,5,6,7,-8,-7,-6,-5,-4,-3,-2,-1;",
 	"O7,CRT Flip Screen,Off,On;",
 	"O8,Video timing,Original,59.8Hz;",
 	"-;",
@@ -414,6 +416,8 @@ burger_time burger_time
 	.flip_screen(status[7]),
 	.orig_vtiming(orig_vtiming),
 	.cpu_speed(cpu_speed),
+	.hsync_adjust(status[27:24]),
+	.vsync_adjust(status[31:28]),
 	.screen_flipped(screen_flipped)
 );
 

@@ -83,13 +83,13 @@ port
 	flip_screen    : in  std_logic;
 	orig_vtiming   : in  std_logic := '1'; -- 1: 272 lines @ 57.44Hz, 0: 261 lines @ 59.86Hz
 	cpu_speed      : in  std_logic := '1'; -- 0: 0.75Mhz, 1: 1.5Mhz
+	hsync_adjust   : in signed(3 downto 0);
+	vsync_adjust   : in signed(3 downto 0);
 	screen_flipped : inout std_logic
-
   );
 end burger_time;
 
 architecture syn of burger_time is
-
   -- clocks, reset
   signal clock_12n      : std_logic;
   signal clock_6        : std_logic := '0';
@@ -130,6 +130,7 @@ architecture syn of burger_time is
   -- video scan counter
   signal hcnt   : std_logic_vector(8 downto 0);
   signal vcnt   : std_logic_vector(8 downto 0);
+  signal vcnt_base : integer;
   signal hsync0 : std_logic;
   signal hsync1 : std_logic;
   signal hsync2 : std_logic;
@@ -243,6 +244,8 @@ end process;
 --  hcnt [0..255,256..383] => 384 pixels,  384/6Mhz => 1 line is 64us (15.625KHz)
 --  vcnt [8..255,256..279] => 272 lines, 1 frame is 272 x 64us = 17.41ms (57.44Hz)
 
+vcnt_base <= 271 when orig_vtiming = '1' else 260;
+
 process (reset, clock_12, clock_6)
 begin
 	if reset='1' then
@@ -254,14 +257,13 @@ begin
 			if hcnt = 383 then
 				hcnt <= (others => '0');
 				-- total should be 272 from Bump&Jump schematics !
-				if (orig_vtiming = '1' and vcnt = 271) or (orig_vtiming = '0' and vcnt = 260) then
+				if vcnt = vcnt_base then
 					vcnt <= (others => '0');
 				else
 					vcnt <= vcnt + '1';
 				end if;
 			end if;
 		end if;
-
 	end if;
 end process;
 
@@ -603,7 +605,7 @@ end process;
 video_csync <= csync;
 
 process(clock_12,clock_6)
-	constant hcnt_base : integer := 312;  --320
+	variable hcnt_base : integer := 312 + to_integer(hsync_adjust);  --320
  	variable vsync_cnt : std_logic_vector(3 downto 0);
 begin
 
@@ -626,11 +628,11 @@ begin
 			end if;
 
 			if hcnt = hcnt_base then
-			 if (orig_vtiming = '1' and vcnt = 261) or (orig_vtiming = '0' and vcnt = 250) then
-				vsync_cnt := X"0";
-			 else
-				if vsync_cnt < X"F" then vsync_cnt := vsync_cnt + '1'; end if;
-			 end if;
+				if vcnt = vcnt_base - 10 - to_integer(vsync_adjust) then
+					vsync_cnt := X"0";
+				elsif vsync_cnt < X"F" then
+					vsync_cnt := vsync_cnt + '1';
+				end if;
 			end if;
 
 			if    vsync_cnt = 0 then csync <= hsync1;
